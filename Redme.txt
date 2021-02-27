@@ -1,0 +1,132 @@
+redeme
+
+Instalação do visual code:
+
+
+Acessar site "https://code.visualstudio.com/" e realizar o download para Windows para arquitetura de 64 bits da opção Stable;
+
+Após reliazar o Download, ao abrir o  visual studio code, foi realizado algumas configurações adicionais, onde foi instalado algumas extensões e para isso devemos :
+
+1- Ir na coluna lateral localizado do lado esquerdo da tela e clicar na botão "Extensions";
+
+2- Na caixa de pesquisa devemos pesquisar por "Material Icon Theme" relacionado extensão dos temas de icone, instalar a primeira opção apresentado e após concluir o download vai ser apresentado a opção para ativar essa extensão de tema de icone;
+
+3- Foi realizado o download da extensão "Hyper term Theme" relacionado ao tema do visual code;
+
+Para executar a automação utilizamos linhas de comando utilizando o programa "Console emulator" e para realizar essa instalação desse programa devemos:
+
+1- Acessar o site: "http://cmder.net" e realizar o download utilizando a opção "Download Full"
+
+2- Após ser finalizado o download, devemos descompactar e copiar a pasta CMDER;
+
+3- Após copiar, vamos na pasta "C:" e criar uma pasta "Tools" e colar a pasta CMDER
+
+Para o desenvolvimento do código, vamos no visual studio code, vamos selecionar criar uma pasta (yaman), em que vai ficar salvo e dentro dessa pasta criar uma pasta (shoestock) onde vai ficar todo o desenvolvimento do código
+
+1- File, open folder e abrir a pasta (yaman) e apenas deixar selecionado a pasta e clicar no botão "Selecionar pasta";
+
+2- Após ser atualizado o visual code vamos criar o Gem file (New file --> Gemfile);
+
+3- Dentro do Gemfile vamos passar a seguite configuração:
+source 'http://rubygems.org'
+gem "capybara"
+gem "cucumber"
+gem "rspec"
+gem "selenium-webdriver"
+
+No cmder vamos executar o seguinte comando:
+bundler install
+
+Quando finalizado a instalação das gems, vamos acessar o site "http://rubygems.org" e vamos pegar as versões da gems declarado acima e então a configuração ficara assim:
+
+gem "capybara", "3.34.0"
+gem "cucumber", "5.2.0"
+gem "rspec", "3.10.0"
+gem "selenium-webdriver", "3.142.7"
+
+Para a criação da estrutura padrão do cucumber vamos no cmder e executar o comando:
+cucumber --init 
+
+Após a criação, vamos importar o capybara na pasta env.rb
+require "capybara"
+require "capybara/cucumber"
+require "selenium-webdriver"
+
+E para a configuração do Capybara vamos fazer a seguinte configuração:
+
+Capybara.configure do |config|
+    config.default_driver = :selenium_chrome //Utilizando o navegador Chrome
+    config.app_host = "https://www.shoestock.com.br/" //Acessando o site
+    config.default_max_wait_time = 5 //Sleep
+
+end
+
+
+Dentro de feature, criar um arquivo chamado "compra.feature" para que seja criado a pasta cucumber e que seja escrito em BDD;
+ Dentro da pasta cucumber foi configurado para utilizar a lingua portugues:
+#language: pt
+E descrito a funcionalidade da automação e escrito os cenarios;
+
+Para um auxilio dos stepes serem executado, no cmder executamos o camando cucumber e vai ser apresentado quais stepes necessita da implementação;
+
+
+Na pasta "step_definitions", criamos um arquivo chamado "carrinho.rb" e vamos colocar o stepes que não foram implementados e foi apresentado no console emulator;
+nos Stepes foram utilizados PageObject:
+
+Dado('que acesso o site shoestock') do
+  @elementos = Elements_page.new
+  @elementos.go
+
+ 
+end
+
+Quando('realizo a busca  por {string}') do |calcado|
+  @elementos = Elements_page.new
+  @elementos.with(calcado)
+end
+Entao('escolho o {string}') do |_string|
+  @elementos = Elements_page.new
+  @elementos.click
+end
+
+Quando('escolho {string} e apertamos no botão comprar') do |_string|
+  @elementos = Elements_page.new
+  @elementos.car
+end
+Entao('devo ver o produto {string} incluídos no carrinho.') do |expect_mensage|
+  @elementos = Elements_page.new
+  expect(@elementos.alert).to eql expect_mensage
+end
+
+E na pasta "Pages" no arquivo "elementos.rb" foi desenvolvido todos as buscas dos elementos Web
+class Elements_page
+    include Capybara::DSL
+
+    def go 
+        visit '/'
+        Capybara.page.driver.browser.manage.window.maximize
+    end
+
+    def with(calcado)
+        find('#search-input').set calcado
+        click_button 'Buscar'
+    end
+
+    def click
+
+        find('#item-list > div.wrapper > div:nth-child(1) > div.item-card__images > a').click
+    end
+
+    def car
+
+        find("#buy-box > section.product-size-selector > div > ul > li:nth-child(3) > a").click
+        click_button "Comprar"
+    end
+     
+    def alert
+
+        produto = find("body > div.main > div.cart.breakpoint.main > div.cart__content > div.cart__items > div.product-items > div > div.product-item__details > div > div > h3").text
+        
+    end
+
+end
